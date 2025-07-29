@@ -260,7 +260,11 @@ def load_data_and_execute_model(model, dataset, augmentor, preprocessor, score_t
         packaged = preprocessor.preprocess([packaged])
 
         with torch.no_grad():
-            pred_instances = model(packaged)[0]
+            temp = model(packaged)
+            print(temp)
+            print("--------------------------------")
+            pred_instances = temp[0]
+            # from ipdb import set_trace; set_trace()
 
         pred_instances = pred_instances[pred_instances.scores >= score_thresh]
         
@@ -335,6 +339,7 @@ if __name__ == "__main__":
             dataset = itertools.islice(dataset, 0, None, args.every_nth_frame)
         
         load_data_and_visualize(dataset)
+        rerun.save("output.rrd")
         sys.exit(0)
 
     assert args.model_path is not None
@@ -363,3 +368,4 @@ if __name__ == "__main__":
         model = model.to(args.device)
 
     load_data_and_execute_model(model, dataset, augmentor, preprocessor, score_thresh=args.score_thresh, viz_on_gt_points=args.viz_on_gt_points)
+    rerun.save("output.rrd")
