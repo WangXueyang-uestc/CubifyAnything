@@ -162,7 +162,7 @@ class CubifyAnythingDataset(webdataset.DataPipeline):
                 depth=read_image_bytes(sample["gt/depth"], expected_size=gt.depth.size)[None].float() / MM_TO_M),
             meta=dict(video_id=video_id, timestamp=timestamp))
 
-        if self.load_arkit_depth:
+        if self.load_arkit_depth:   
             result["wide"]["depth"] = read_image_bytes(sample["wide/depth"], expected_size=wide.depth.size)[None].float() / MM_TO_M
 
         return result

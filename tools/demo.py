@@ -250,21 +250,18 @@ def load_data_and_execute_model(model, dataset, augmentor, preprocessor, score_t
             # Backproject GT depth to world so we can compare our predictions.
             depth_gt = sample["gt"]["depth"][-1]
             matched_image = torch.tensor(np.array(Image.fromarray(image).resize((depth_gt.shape[1], depth_gt.shape[0]))))
-
+            
             # Feel free to change max_depth, but know CA is only trained up to 5m.
             xyz, valid = unproject(depth_gt, sample["sensor_info"].gt.depth.K[-1], torch.eye(4), max_depth=10.0)
             xyzrgb = torch.cat((xyz, matched_image / 255.0), dim=-1)[valid]            
-                    
+        
         packaged = augmentor.package(sample)
         packaged = move_input_to_current_device(packaged, device)
         packaged = preprocessor.preprocess([packaged])
 
         with torch.no_grad():
             temp = model(packaged)
-            print(temp)
-            print("--------------------------------")
             pred_instances = temp[0]
-            # from ipdb import set_trace; set_trace()
 
         pred_instances = pred_instances[pred_instances.scores >= score_thresh]
         
@@ -299,7 +296,6 @@ if __name__ == "__main__":
 
     dataset_path = args.dataset_path
     use_cache = False
-    
     if dataset_path == "stream":
         dataset = CaptureDataset()
     else:
@@ -327,7 +323,6 @@ if __name__ == "__main__":
 
         if len(dataset_files) == 0:
             raise ValueError("No data was found")
-            
         dataset = CubifyAnythingDataset(
             [Path(df).as_uri() if not df.startswith("https://") else df for df in dataset_files],
             yield_world_instances=args.viz_only,
@@ -352,7 +347,7 @@ if __name__ == "__main__":
         
     # We need to detect RGB or RGB only models so we can disable sending depth.                
     is_depth_model = any(k.startswith("backbone.0.patch_embed_depth.") for k in checkpoint.keys())
-
+    # from ipdb import set_trace; set_trace()
     model = make_cubify_transformer(dimension=backbone_embedding_dimension, depth_model=is_depth_model).eval()
     model.load_state_dict(checkpoint)
 

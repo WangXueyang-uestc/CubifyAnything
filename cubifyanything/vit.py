@@ -173,6 +173,7 @@ class Attention(nn.Module):
         qkv = self.qkv(x).reshape(B, H * W, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
 
         # q, k, v with shape (B * nHead, H * W, C)
+        # from ipdb import set_trace; set_trace()
         q, k, v = qkv.reshape(3, B * self.num_heads, H * W, -1).unbind(0)
 
         if self.depth_modality and (depth is not None):
@@ -242,7 +243,7 @@ class Block(nn.Module):
                 parameter size.
         """
         super().__init__()
-
+        # from ipdb import set_trace;set_trace()
         if depth_modality and (depth_window_size == 0):
             raise ValueError("unsupported")
 
@@ -476,7 +477,7 @@ class ViT(nn.Module):
         self._out_feature_strides = {out_feature: patch_size}
         self._out_features = [out_feature]
         self.window_block_indexes = window_block_indexes
-
+        
         self.drop_path = nn.Identity()
 
         self._square_pad = [256, 384, 512, 640, 768, 896, 1024, 1280]
@@ -513,7 +514,7 @@ class ViT(nn.Module):
                 x, depth = blk(x, depth=depth)
             else:
                 x, *_ = blk(x)
-
+        # from ipdb import set_trace; set_trace()
         x = self.encoder_norm(x)
 
         outputs = {self._out_features[0]: x.permute(0, 3, 1, 2)}

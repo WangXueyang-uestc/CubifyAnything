@@ -139,6 +139,7 @@ class GlobalCrossAttention(nn.Module):
         input_padding_mask=None,
         box_attn_prior_mask=None
     ):
+        # from ipdb import set_trace; set_trace()
         assert input_spatial_shapes.size(0) == 1, 'This is designed for single-scale decoder.'
         h, w = input_spatial_shapes[0]
         stride = self.feature_stride
@@ -279,7 +280,7 @@ class PreNormGlobalDecoderLayer(nn.Module):
         tgt2 = self.norm3(tgt)
         tgt2 = self.linear2(self.dropout3(self.activation(self.linear1(tgt2))))
         tgt = tgt + self.dropout4(tgt2)
-
+        # from ipdb import set_trace; set_trace()
         return tgt
 
 # This should be super vague, and take in "prompts" as queries and simply run them through
@@ -304,7 +305,7 @@ class PromptDecoder(nn.Module):
         reference = [Instances3D.cat([prompt.pred[idx] for prompt in prompts if prompt.box_attn_prior_mask.any()])
                      for idx in range(prompts[0].batch_size)]
 
-        prompts = Prompt.cat(prompts)        
+        prompts = Prompt.cat(prompts)
         output = prompts.query
         intermediate = []
         intermediate_preds = []
@@ -336,7 +337,6 @@ class PromptDecoder(nn.Module):
                     pred_instances_.proposal_z_unscaled = reference_.pred_z_unscaled
                     pred_instances_.proposal_dims = reference_.pred_dims
                     pred_instances_.proposal_pose = reference_.pred_pose
-
             for predictor in self.predictors[lid]:
                 # Hacky, but let a predictor alter the output.
                 output_after_norm = predictor(output_after_norm, pred_instances, sensor)
@@ -349,6 +349,7 @@ class PromptDecoder(nn.Module):
             reference = pred_instances
 
         # Always return the full sequence of intermediates.
+        # from ipdb import set_trace; set_trace()
         return torch.stack(intermediate), intermediate_preds
 
 class PromptEncoder(nn.Module):
@@ -881,6 +882,7 @@ class EncoderProposals(Prompter):
             )
             grid = torch.cat([grid_x.unsqueeze(-1), grid_y.unsqueeze(-1)], -1)
             grid = (grid.unsqueeze(0).expand(N_, -1, -1, -1) + 0.5) * stride
+            # from ipdb import set_trace; set_trace()
             wh = torch.ones_like(grid) * self.min_proposal_size * (2.0 ** (lvl - start_level))
             proposal = torch.cat((grid, wh), -1).view(N_, -1, 4)
             proposals.append(proposal)
@@ -947,6 +949,7 @@ class EncoderProposals(Prompter):
         topk_values, topk_indexes = torch.topk(class_prob.view(-1), topk)
 
         class_scores = topk_values
+        from ipdb import set_trace; set_trace()
         topk_boxes = topk_indexes // class_prob.shape[-1]
         labels = topk_indexes % class_prob.shape[-1]
         
@@ -1197,7 +1200,7 @@ class CubifyTransformer(nn.Module):
             srcs, pos_embeds, masks)
 
         device = src_flatten.device
-
+        # from ipdb import set_trace; set_trace()
         prompts = self.prompting.get_image_prompts(src_flatten, mask_flatten, spatial_shapes, sensor)
         prompters = self.prompting.prompters
 

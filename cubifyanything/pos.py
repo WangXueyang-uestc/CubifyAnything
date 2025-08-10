@@ -69,6 +69,7 @@ def generate_rays(
     )
     height, width = image_shape
     # Generate grid of pixel coordinates
+    # from ipdb import set_trace; set_trace()
     pixel_coords_x = torch.linspace(0, width - 1, width, device=device, dtype=dtype)
     pixel_coords_y = torch.linspace(0, height - 1, height, device=device, dtype=dtype)
     if noisy:
